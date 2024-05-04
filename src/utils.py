@@ -193,3 +193,168 @@ def fill_missing_PRCP_prev():
             df = fill_missing_PRCP_with_prev_non_nan(df)  
             df.to_csv(file_path, index=False)
             print(f"Missing values in 'PRCP' have been replaced by previous Non-NaN value in '{file_name}'.")
+
+
+
+def fill_missing_TMIN_ATTRIBUTES(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['TMIN_ATTRIBUTES']):
+            next_index = index + 1
+            while next_index < len(df_copy):
+                next_value = df_copy.at[next_index, 'TMIN_ATTRIBUTES']
+                if not pd.isna(next_value):
+                    df_copy.at[index, 'TMIN_ATTRIBUTES'] = next_value
+                    break
+                next_index += 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'TMIN_ATTRIBUTES'] = None
+    return df_copy
+
+
+def fill_TMIN_ATTRIBUTES():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_TMIN_ATTRIBUTES(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'TMIN_ATTRIBUTES' have been replaced by next Non nan value '{file_name}'.") 
+
+def fill_missing_TMAX_ATTRIBUTES(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['TMAX_ATTRIBUTES']):
+            next_index = index + 1
+            while next_index < len(df_copy):
+                next_value = df_copy.at[next_index, 'TMAX_ATTRIBUTES']
+                if not pd.isna(next_value):
+                    df_copy.at[index, 'TMAX_ATTRIBUTES'] = next_value
+                    break
+                next_index += 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'TMAX_ATTRIBUTES'] = None
+    return df_copy
+
+
+def fill_TMAX_ATTRIBUTES():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_TMAX_ATTRIBUTES(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'TMAX_ATTRIBUTES' have been replaced by next Non nan value '{file_name}'.") 
+
+def fill_missing_TMAX_ATTRIBUTES_prev(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['TMAX_ATTRIBUTES']):
+            prev_index = index - 1
+            while prev_index >= 0:
+                prev_value = df_copy.at[prev_index, 'TMAX_ATTRIBUTES']
+                if not pd.isna(prev_value):
+                    df_copy.at[index, 'TMAX_ATTRIBUTES'] = prev_value
+                    break
+                prev_index -= 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'TMAX_ATTRIBUTES'] = None
+    return df_copy
+
+def fill_TMAX_ATTRIBUTES_prev():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_TMAX_ATTRIBUTES_prev(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'TMAX_ATTRIBUTES' have been replaced by previous Non nan value '{file_name}'.") 
+
+
+def fill_missing_TMIN_ATTRIBUTES_prev(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['TMIN_ATTRIBUTES']):
+            prev_index = index - 1
+            while prev_index >= 0:
+                prev_value = df_copy.at[prev_index, 'TMIN_ATTRIBUTES']
+                if not pd.isna(prev_value):
+                    df_copy.at[index, 'TMIN_ATTRIBUTES'] = prev_value
+                    break
+                prev_index -= 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'TMIN_ATTRIBUTES'] = None
+    return df_copy
+
+def fill_TMIN_ATTRIBUTES_prev():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_TMIN_ATTRIBUTES_prev(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'TMIN_ATTRIBUTES' have been replaced by previous Non nan value '{file_name}'.") 
+
+
+
+def fill_missing_PRCP_ATTRIBUTES_prev(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['PRCP_ATTRIBUTES']):
+            prev_index = index - 1
+            while prev_index >= 0:
+                prev_value = df_copy.at[prev_index, 'PRCP_ATTRIBUTES']
+                if not pd.isna(prev_value):
+                    df_copy.at[index, 'PRCP_ATTRIBUTES'] = prev_value
+                    break
+                prev_index -= 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'PRCP_ATTRIBUTES'] = None
+    return df_copy
+
+def fill_PRCP_ATTRIBUTES_prev():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_PRCP_ATTRIBUTES_prev(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'PRCP_ATTRIBUTES' have been replaced by previous Non nan value '{file_name}'.") 
+
+
+def fill_missing_PRCP_ATTRIBUTES(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['PRCP_ATTRIBUTES']):
+            next_index = index + 1
+            while next_index < len(df_copy):
+                next_value = df_copy.at[next_index, 'PRCP_ATTRIBUTES']
+                if not pd.isna(next_value):
+                    df_copy.at[index, 'PRCP_ATTRIBUTES'] = next_value
+                    break
+                next_index += 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'PRCP_ATTRIBUTES'] = None
+    return df_copy
+
+
+def fill_PRCP_ATTRIBUTES():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_PRCP_ATTRIBUTES(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'PRCP_ATTRIBUTES' have been replaced by next Non nan value '{file_name}'.") 
