@@ -111,6 +111,45 @@ def fill_missing_TMAX():
             print(f"Missing values in 'TMAX' have been replaced by the mean of the next 5 days in '{file_name}'.")
 
 
+# #* Function that fills missing PRCP
+# def fill_missing_PRCP_with_next_mean(df):
+#     # Create a copy of the DataFrame to avoid modifying the original
+#     df_copy = df.copy()
+#     # Fill missing values in PRCP column with the mean of the next 5 non-NaN values
+#     for index, row in df_copy.iterrows():
+#         if pd.isna(row['PRCP']):
+#             # Select the next 3 rows after the current index
+#             next_values = df_copy.loc[index+1:index+5, 'PRCP'].dropna()
+#             # Check if there are enough non-NaN values in the next 5 rows
+#             if len(next_values) > 0:
+#                 # Calculate the mean of the next non-NaN values and fill the missing value
+#                 df_copy.at[index, 'PRCP'] = round(next_values.mean(), 1)
+#             else:
+#                 # If there are not enough non-NaN values in the next 5 rows, continue searching
+#                 offset = 1
+#                 while len(next_values) == 0 and index+offset < len(df_copy):
+#                     next_values = df_copy.loc[index+offset:index+offset+5, 'PRCP'].dropna()
+#                     offset += 1
+#                 # If non-NaN values are found, calculate the mean and fill the missing value
+#                 if len(next_values) > 0:
+#                     df_copy.at[index, 'PRCP'] = next_values.mean()
+#                 # If there are still no non-NaN values, fill with NaN
+#                 else:
+#                     df_copy.at[index, 'PRCP'] = None
+#     return df_copy
+
+
+# def fill_missing_PRCP():
+#     folder_path = 'data/processed/Algeria'
+#     for file_name in os.listdir(folder_path):
+#         if file_name.endswith('.csv'):
+#             file_path = os.path.join(folder_path, file_name)
+#             df = pd.read_csv(file_path)
+#             df = fill_missing_PRCP_with_next_mean(df)  
+#             df.to_csv(file_path, index=False)
+#             print(f"Missing values in 'PRCP' have been replaced by the mean of the next 5 days in '{file_name}'.")
+
+
 def fill_missing_TMAX_with_prev_mean(df):
     df_copy = df.copy()
     for index, row in df_copy.iterrows():
@@ -129,3 +168,34 @@ def fill_missing_TMAX_with_prev_mean(df):
                     df_copy.at[index, 'TMAX'] = None
     return df_copy
 
+
+import pandas as pd
+
+
+def fill_missing_PRCP_with_next_non_nan(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['PRCP']):
+            next_index = index + 1
+            while next_index < len(df_copy):
+                next_value = df_copy.at[next_index, 'PRCP']
+                if not pd.isna(next_value):
+                    df_copy.at[index, 'PRCP'] = next_value
+                    break
+                next_index += 1
+            else:
+                # If no non-NaN value is found, set the current value to NaN
+                df_copy.at[index, 'PRCP'] = None
+    return df_copy
+
+
+
+def fill_missing_PRCP():
+    folder_path = 'data/processed/Algeria'
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            df = pd.read_csv(file_path)
+            df = fill_missing_PRCP_with_next_non_nan(df)  
+            df.to_csv(file_path, index=False)
+            print(f"Missing values in 'PRCP' have been replaced by next Non nan value '{file_name}'.")
