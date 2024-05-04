@@ -106,9 +106,26 @@ def fill_missing_TMAX():
         if file_name.endswith('.csv'):
             file_path = os.path.join(folder_path, file_name)
             df = pd.read_csv(file_path)
-            df = fill_missing_TMAX_with_next_mean(df)  # Use the modified function here
+            df = fill_missing_TMAX_with_next_mean(df)  
             df.to_csv(file_path, index=False)
             print(f"Missing values in 'TMAX' have been replaced by the mean of the next 5 days in '{file_name}'.")
 
 
+def fill_missing_TMAX_with_prev_mean(df):
+    df_copy = df.copy()
+    for index, row in df_copy.iterrows():
+        if pd.isna(row['TMAX']):
+            prev_values = df_copy.loc[max(0, index-5):index-1, 'TMAX'].dropna()
+            if len(prev_values) > 0:
+                df_copy.at[index, 'TMAX'] = round(prev_values.mean(), 1)  # Round to 1 decimal place
+            else:
+                offset = 1
+                while len(prev_values) == 0 and index+offset < len(df_copy):
+                    prev_values = df_copy.loc[max(0, index-offset-5):index-offset-1, 'TMAX'].dropna()
+                    offset += 1
+                if len(prev_values) > 0:
+                    df_copy.at[index, 'TMAX'] = round(prev_values.mean(), 1)  # Round to 1 decimal place
+                else:
+                    df_copy.at[index, 'TMAX'] = None
+    return df_copy
 
