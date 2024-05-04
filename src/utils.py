@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+#* Function that drops columns
 def drop_columns(folder_path, columns_to_drop):
     for file_name in os.listdir(folder_path):
         if file_name.endswith('.csv'):
