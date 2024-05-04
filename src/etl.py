@@ -3,5 +3,5 @@ from utils import *
 import pandas as pd
 # drop_TAVG_TAVG_ATTRIBUTES()
 # fill_missing_TMIN()
-fill_missing_TMAX()
-
+# fill_missing_TMAX()
+fill_missing_PRCP()
