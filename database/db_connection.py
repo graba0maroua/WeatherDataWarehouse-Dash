@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 from db_config import create_connection
-
+import mysql.connector
+#create_connection contains my MYSQL connection it looks like this and i saved it in db_config
 # *create_connection contains my MYSQL connection it looks like this and i saved it in db_config
 # *def create_connection():
 #     return mysql.connector.connect(
@@ -111,14 +112,24 @@ def insert_data(connection, file_path):
 
 
 # Main function
+import os
+
 def main():
-    folder_path = 'data/processed/Algeria'
+    processed_folder = 'data/processed'
     connection = create_connection()
     create_tables(connection)
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith('.csv'):
-            file_path = os.path.join(folder_path, file_name)
-            insert_data(connection, file_path)
+    
+    # Iterate over folders in the processed directory
+    for country_folder in os.listdir(processed_folder):
+        country_folder_path = os.path.join(processed_folder, country_folder)
+        
+        # Check if the item is a directory
+        if os.path.isdir(country_folder_path):
+            for file_name in os.listdir(country_folder_path):
+                if file_name.endswith('.csv'):
+                    file_path = os.path.join(country_folder_path, file_name)
+                    insert_data(connection, file_path)
+    
     connection.close()
     print("Data insertion completed.")
 
