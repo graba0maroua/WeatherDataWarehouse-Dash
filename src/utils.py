@@ -30,6 +30,27 @@ def drop_TAVG_TAVG_ATTRIBUTES():
     drop_columns(folder_path, columns_to_drop)
 
 
+def drop_columns_if_not_exist(file_path):
+    df = pd.read_csv(file_path)
+    columns_to_drop = []
+    if 'SNWD' in df.columns:
+        columns_to_drop.append('SNWD')
+    if 'SNWD_ATTRIBUTES' in df.columns:
+        columns_to_drop.append('SNWD_ATTRIBUTES')
+    
+    if columns_to_drop:
+        df = df.drop(columns=columns_to_drop)
+        print(f"Dropped columns: {', '.join(columns_to_drop)}")
+        df.to_csv(file_path, index=False)
+    
+    return df
+
+def drop_columns_for_all_files(folder_path):
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(folder_path, file_name)
+            drop_columns_if_not_exist(file_path)
+
 #* Function that fills missing TMIN
 def fill_missing_TMIN_with_next_mean(df):
     # Create a copy of the DataFrame to avoid modifying the original
@@ -358,60 +379,3 @@ def fill_PRCP_ATTRIBUTES():
             df = fill_missing_PRCP_ATTRIBUTES(df)  
             df.to_csv(file_path, index=False)
             print(f"Missing values in 'PRCP_ATTRIBUTES' have been replaced by next Non nan value '{file_name}'.") 
-
-def fill_missing_SNWD_ATTRIBUTES(df):
-    if 'SNWD_ATTRIBUTES' not in df.columns:
-        return df
-    df_copy = df.copy()
-    for index, row in df_copy.iterrows():
-        if pd.isna(row['SNWD_ATTRIBUTES']):
-            next_index = index + 1
-            while next_index < len(df_copy):
-                next_value = df_copy.at[next_index, 'SNWD_ATTRIBUTES']
-                if not pd.isna(next_value):
-                    df_copy.at[index, 'SNWD_ATTRIBUTES'] = next_value
-                    break
-                next_index += 1
-            else:
-                # If no non-NaN value is found, set the current value to NaN
-                df_copy.at[index, 'SNWD_ATTRIBUTES'] = None
-    return df_copy
-
-
-def fill_SNWD_ATTRIBUTES():
-    folder_path = 'data/processed/Algeria'
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith('.csv'):
-            file_path = os.path.join(folder_path, file_name)
-            df = pd.read_csv(file_path)
-            df = fill_missing_SNWD_ATTRIBUTES(df)  
-            df.to_csv(file_path, index=False)
-            print(f"Missing values in 'SNWD_ATTRIBUTES' have been replaced by next Non nan value '{file_name}'.") 
-
-def fill_missing_SNWD_ATTRIBUTES_prev(df):
-    if 'SNWD_ATTRIBUTES' not in df.columns:
-        return df
-    df_copy = df.copy()
-    for index, row in df_copy.iterrows():
-        if pd.isna(row['SNWD_ATTRIBUTES']):
-            prev_index = index - 1
-            while prev_index >= 0:
-                prev_value = df_copy.at[prev_index, 'SNWD_ATTRIBUTES']
-                if not pd.isna(prev_value):
-                    df_copy.at[index, 'SNWD_ATTRIBUTES'] = prev_value
-                    break
-                prev_index -= 1
-            else:
-                # If no non-NaN value is found, set the current value to NaN
-                df_copy.at[index, 'SNWD_ATTRIBUTES'] = None
-    return df_copy
-
-def fill_SNWD_ATTRIBUTES_prev():
-    folder_path = 'data/processed/Algeria'
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith('.csv'):
-            file_path = os.path.join(folder_path, file_name)
-            df = pd.read_csv(file_path)
-            df = fill_missing_SNWD_ATTRIBUTES_prev(df)  
-            df.to_csv(file_path, index=False)
-            print(f"Missing values in 'SNWD_ATTRIBUTES' have been replaced by previous Non nan value '{file_name}'.") 
