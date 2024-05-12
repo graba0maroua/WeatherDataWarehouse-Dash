@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 from db_config import create_connection
-import mysql.connector
 
 # create_connection contains my MYSQL connection it looks like this and i saved it in db_config
 # ?   def create_connection():
