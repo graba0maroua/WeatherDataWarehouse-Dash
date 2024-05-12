@@ -1,10 +1,12 @@
 import mysql.connector
-from  db_config import create_connection
+from db_config import create_connection
+
 # Récupérer les données climatiques depuis la base de données
 connection = create_connection()
-def fetch_weather_data(country):
+
+def fetch_precipitation_data(country):
     query = f"""
-        SELECT t.Année AS Year, t.Mois, mm.precipitation, mm.temperature_max
+        SELECT t.Année , t.Mois, mm.precipitation
         FROM mesures_météorologiques mm
         INNER JOIN temps t ON mm.id_date = t.id_date
         INNER JOIN station s ON mm.id_station = s.id_station
