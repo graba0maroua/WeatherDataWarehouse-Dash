@@ -1,4 +1,4 @@
 database/db_config.py
 db_config.py
-ETL/__pycache__/
-database/__pycache__/
+ETL/__pycache__
+database/__pycache__
