@@ -9,12 +9,12 @@ app = dash.Dash(__name__)
 
 def establish_database_connection():
     try:
-        conn = mysql.connector.connect(
-            host="localhost",
-            database="weather_datawarehouse",
-            user="root",
-            # password="........"
-        )
+        # conn = mysql.connector.connect(
+        #     host="......",
+        #     database="..........",
+        #     user=".........",
+        #     password="........"
+        # )
         print(f"database connected")
         return conn
         
