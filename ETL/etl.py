@@ -20,6 +20,8 @@ import pandas as pd
 # fill_PRCP_ATTRIBUTES()
 
 # usage example :
-folder_path = 'data/processed/Algeria'
-utils_AG.drop_columns_for_all_files(folder_path)
+folder_path = 'data/processed/Tunisia'
+#utils_AG.drop_columns_for_all_files(folder_path)
+df=pd.read_csv('data/processed/Tunisia/Weather_2020-2022_TUNISIA.csv') 
+print(df.info())
 
