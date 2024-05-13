@@ -26,10 +26,10 @@ def establish_database_connection():
 conn = establish_database_connection()
 
 def update_weather_map(selected_countries, start_date, end_date):
-    global conn  
+    global conn  # Declare conn as global
 
     if not selected_countries or start_date is None or end_date is None:
-        return pd.DataFrame() 
+        return pd.DataFrame()  # Return an empty DataFrame
 
     # Re-establish MySQL connection if it's closed or lost
     if conn is None or not conn.is_connected():
@@ -42,22 +42,26 @@ def update_weather_map(selected_countries, start_date, end_date):
     # Construct the IN clause for multiple countries
     country_in_clause = ", ".join(["'%s'" % country for country in selected_countries])
 
-    #SQL query to fetch data from the database for multiple countries
+    # Execute SQL query to fetch data from the database for multiple countries
     cursor = conn.cursor(dictionary=True)
     cursor.execute(f"""
-        SELECT station.Ville, station.Latitude, station.Longitude, temps.Date, 
-               Mesures_Météorologiques.temperature_max, Mesures_Météorologiques.temperature_min, 
-               Mesures_Météorologiques.precipitation  
-        FROM Mesures_Météorologiques             
-        JOIN station ON Mesures_Météorologiques.id_station = station.id_station         
-        JOIN temps ON Mesures_Météorologiques.id_date = temps.id_date            
-        WHERE station.Pays IN ({country_in_clause}) AND temps.Date BETWEEN %s AND %s            
-        
-    """, (start_date, end_date))
+    
+    SELECT station.Ville, station.Latitude, station.Longitude,
+        MAX(Mesures_Météorologiques.temperature_max) AS temperature_max,
+        MIN(Mesures_Météorologiques.temperature_min) AS temperature_min,
+        AVG(Mesures_Météorologiques.precipitation) AS precipitation
+    FROM Mesures_Météorologiques
+    JOIN station ON Mesures_Météorologiques.id_station = station.id_station
+    JOIN temps ON Mesures_Météorologiques.id_date = temps.id_date
+    WHERE station.Pays IN ({country_in_clause}) AND temps.Date BETWEEN %s AND %s
+    GROUP BY station.Ville, station.Latitude, station.Longitude
+
+
+""", (start_date, end_date))
 
     rows = cursor.fetchall()
 
-    return pd.DataFrame(rows)  
+    return pd.DataFrame(rows)  # Convert the fetched data into a DataFrame
 
 # Define CSS styles for elements
 external_stylesheets = {
@@ -65,7 +69,7 @@ external_stylesheets = {
     'padding': '20px'
 }
 
-
+# Apply styles to components
 app.layout = html.Div(style=external_stylesheets, children=[
     html.H1('Weather Data Visualization', style={'text-align': 'center'}),
     html.Div([
@@ -76,8 +80,8 @@ app.layout = html.Div(style=external_stylesheets, children=[
                 {'label': 'Morocco', 'value': 'MO'},
                 {'label': 'Tunisia', 'value': 'TS'},  
             ],
-            value=['MO'],  
-            multi=True,  
+            value=['MO'],  # Set default value to MO
+            multi=True,  # Allow multiple selections
             style={'width': '50%'}
         ),
         dcc.DatePickerRange(
@@ -101,6 +105,7 @@ app.layout = html.Div(style=external_stylesheets, children=[
 ])
 
 # Define callback to update the map
+
 @app.callback(
     Output('weather-map', 'figure'),
     [Input('country-dropdown', 'value'),
@@ -117,18 +122,14 @@ def update_map(selected_countries, start_date, end_date):
     if weather_data.empty:
         return {}
 
-    # Calculate minimum and maximum temperatures for hover data
-    min_temp = weather_data['temperature_min'].min()
-    max_temp = weather_data['temperature_max'].max()
-
     # Create a scatter map plot using Plotly Express
     fig = px.scatter_mapbox(weather_data, lat="Latitude", lon="Longitude",
                             hover_name="Ville",
-                            hover_data={"Date": True, "precipitation": True,
-                                        "temperature_min": True, "temperature_max":True},
+                            hover_data={"precipitation": True,
+                                        "temperature_min": True,
+                                        "temperature_max": True},
                             zoom=3, height=600,
-                        
-                            )
+                           )
 
     fig.update_layout(title=f"Weather in {' & '.join(selected_countries)} ({start_date} - {end_date})",
                       mapbox_style="open-street-map",
