@@ -16,7 +16,8 @@ station_options = [{'label': station['ville'], 'value': station['ville']} for st
 app = dash.Dash(__name__)
 
 app.layout = html.Div(style={'backgroundColor': '#f9f9f9', 'padding': '20px'}, children=[
-    html.H1("Évolution de la précipitation par station", style={'color': '#333333', 'textAlign': 'center'}),
+    html.H1("Évolution de la précipitation par station", style={'color': '#333333', 'textAlign': 'center','textSize':'23px'}),
+    html.P("Ce graphique montre l'évolution de la précipitation au fil des ans pour une station météorologique donnée.",style={'color': '#333333', 'textAlign': 'center'}),
     html.Div([
         html.Div([
             dcc.Dropdown(
