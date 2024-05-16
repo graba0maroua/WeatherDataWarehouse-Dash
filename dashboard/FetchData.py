@@ -44,3 +44,4 @@ def fetch_stations():
     stations = cursor.fetchall()
     cursor.close()
     return stations
+

@@ -4,8 +4,6 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
 from FetchData import fetch_precipitation_data_at_station, fetch_stations
-
-app = dash.Dash(__name__)
 months_mapping = {
     1: 'janvier', 2: 'février', 3: 'mars', 4: 'avril', 5: 'mai', 6: 'juin',
     7: 'juillet', 8: 'août', 9: 'septembre', 10: 'octobre', 11: 'novembre', 12: 'décembre'
@@ -15,8 +13,10 @@ stations = fetch_stations()
 station_options = [{'label': station['ville'], 'value': station['ville']} for station in stations]
 
 # Define the layout of the app
-app.layout = html.Div([
-    html.H1("Évolution de la précipitation par station", style={'color': '#333333', 'text-align': 'center'}),
+app = dash.Dash(__name__)
+
+app.layout = html.Div(style={'backgroundColor': '#f9f9f9', 'padding': '20px'}, children=[
+    html.H1("Évolution de la précipitation par station", style={'color': '#333333', 'textAlign': 'center'}),
     html.Div([
         html.Div([
             dcc.Dropdown(
@@ -31,7 +31,7 @@ app.layout = html.Div([
                 placeholder="Sélectionnez un pays",
                 style={'fontFamily': 'Lato'}
             ),
-        ], style={'display': 'inline-block', 'width': '45%', 'margin-left': '2%', 'margin-right': '2%'}),
+        ], style={'display': 'inline-block', 'width': '45%', 'margin': '10px'}),
         html.Div([
             dcc.Dropdown(
                 id='station-dropdown',
@@ -39,15 +39,16 @@ app.layout = html.Div([
                 value=stations[0]['ville'],  # Default value to the first station
                 clearable=False,
                 placeholder="Select a City",
+                style={'fontFamily': 'Lato'}
             ),
-        ], style={'display': 'inline-block', 'width': '45%'}),
+        ], style={'display': 'inline-block', 'width': '45%', 'margin': '10px'}),
     ]),
-    dcc.Graph(id='precipitation-graph')
+    html.Div(id='graph-container', style={'backgroundColor': 'white', 'boxShadow': '2px 2px 8px rgba(0, 0, 0, 0.1)', 'borderRadius': '10px'}),
 ])
 
 # Define the callback to update the graph based on user inputs
 @app.callback(
-    Output('precipitation-graph', 'figure'),
+    Output('graph-container', 'children'),
     [Input('station-dropdown', 'value'),
     Input('country-dropdown', 'value')]
 )
@@ -60,12 +61,12 @@ def update_precipitation_graph(city, selected_country):
         # Create the line chart
         fig = px.line(df, x='Année', y='precipitation', color='Mois', markers=True, 
                       title=f'Évolution de la précipitation au fil des ans à {city} ({selected_country})')
-        fig.update_xaxes(title_text='Année (1920 - 2022)')
-        fig.update_yaxes(title_text='Précipitation (PRCP)')
-        return fig
+        fig.update_xaxes(title_text='Année (1920 - 2022)', showgrid=False)
+        fig.update_yaxes(title_text='Précipitation (PRCP)', showgrid=False)
+        return dcc.Graph(figure=fig)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        return {}
+        return html.Div("An error occurred while fetching data.", style={'color': 'red'})
 
 if __name__ == '__main__':
     app.run_server(debug=True)
