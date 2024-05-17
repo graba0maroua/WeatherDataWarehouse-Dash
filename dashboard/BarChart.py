@@ -3,7 +3,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
-from FetchData import  fetch_stations
+from FetchData import fetch_stations
 from db_config import create_connection
 
 # Define mapping for season names in French
@@ -14,13 +14,19 @@ seasons_mapping = {
     'Autumn': 'Automne'
 }
 
+# Define custom color palette for each season
+season_colors = {
+    'Winter': '#6495ED',  # Cornflower Blue
+    'Spring': '#3CB371',  # Medium Sea Green
+    'Summer': '#FF6347',  # Tomato
+    'Autumn': '#FFA500'   # Orange
+}
+
 def fetch_temperature_data_at_station(city, selected_country):
     try:
-        # Connect to your MySQL database
-        cnx =create_connection()
+        cnx = create_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Execute SQL query to fetch temperature data for the specified station
         query = """
         SELECT t.Année, t.Saison,
             ROUND(AVG(m.temperature_max), 1) AS avg_temperature_max,
@@ -33,11 +39,8 @@ def fetch_temperature_data_at_station(city, selected_country):
         GROUP BY t.Année, t.Saison
         """
         cursor.execute(query, (city, selected_country))
-        
-        # Fetch all rows of the result
         data = cursor.fetchall()
         
-        # Close the cursor and database connection
         cursor.close()
         cnx.close()
         
@@ -46,15 +49,23 @@ def fetch_temperature_data_at_station(city, selected_country):
         print(f"An error occurred: {str(e)}")
         return None
 
-# Fetch station data for dropdown
 stations = fetch_stations()
 station_options = [{'label': station['ville'], 'value': station['ville']} for station in stations]
 
-# Define the layout of the app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
-app.layout = html.Div(style={'backgroundColor': '#f9f9f9', 'padding': '20px'}, children=[
-    html.H1("Évolution de la température par saison", style={'color': '#333333', 'textAlign': 'center'}),
+app.layout = html.Div(style={
+    'backgroundColor': '#f4f4f4',
+    'padding': '30px',
+    'fontFamily': 'Arial, sans-serif'
+}, children=[
+    html.H1("Évolution de la Température par Saison", style={
+        'color': '#333333',
+        'textAlign': 'center',
+        'marginBottom': '40px',
+        'fontSize': '2.5em',
+        'fontFamily': 'Lato, sans-serif'
+    }),
     html.Div([
         html.Div([
             dcc.Dropdown(
@@ -67,24 +78,27 @@ app.layout = html.Div(style={'backgroundColor': '#f9f9f9', 'padding': '20px'}, c
                 value='AG',
                 clearable=False,
                 placeholder="Sélectionnez un pays",
-                style={'fontFamily': 'Lato'}
+                style={'fontFamily': 'Lato, sans-serif', 'color': '#333'}
             ),
-        ], style={'display': 'inline-block', 'width': '45%', 'margin': '10px'}),
+        ], style={'display': 'inline-block', 'width': '45%', 'paddingRight': '20px'}),
         html.Div([
             dcc.Dropdown(
                 id='station-dropdown',
                 options=station_options,
-                value=stations[0]['ville'],  # Default value to the first station
+                value=stations[0]['ville'],
                 clearable=False,
-                placeholder="Select a City",
-                style={'fontFamily': 'Lato'}
+                placeholder="Sélectionnez une ville",
+                style={'fontFamily': 'Lato, sans-serif', 'color': '#333'}
             ),
-        ], style={'display': 'inline-block', 'width': '45%', 'margin': '10px'}),
-    ]),
-    html.Div(id='graph-container', style={'backgroundColor': 'white', 'boxShadow': '2px 2px 8px rgba(0, 0, 0, 0.1)', 'borderRadius': '10px'}),
+        ], style={'display': 'inline-block', 'width': '45%'}),
+    ], style={'marginBottom': '40px'}),
+    dcc.Loading(
+        id="loading",
+        type="default",
+        children=html.Div(id='graph-container')
+    ),
 ])
 
-# Define the callback to update the graph based on user inputs
 @app.callback(
     Output('graph-container', 'children'),
     [Input('station-dropdown', 'value'),
@@ -94,36 +108,51 @@ def update_temperature_graph(city, selected_country):
     try:
         data = fetch_temperature_data_at_station(city, selected_country)
         df = pd.DataFrame(data)
-        
-        # Replace numerical month values with French names
         df['Saison'] = df['Saison'].map(seasons_mapping)
         
-        # Create bar chart for temperature_max
         fig_max = px.bar(df, x='Année', y='avg_temperature_max', color='Saison', 
-                         title=f'Évolution de la température maximale moyenne par saison à {city} ({selected_country})')
-        fig_max.update_xaxes(title_text='Année (1920 - 2022)', showgrid=False)
-        fig_max.update_yaxes(title_text='Température maximale moyenne (°C)', showgrid=False)
+                         title=f'Température Maximale Moyenne par Saison à {city} ({selected_country})',
+                         color_discrete_map=season_colors)
+        fig_max.update_layout(
+            xaxis_title='Année (1920 - 2022)',
+            yaxis_title='Température Maximale Moyenne (°C)',
+            plot_bgcolor='white'
+        )
         
-        # Create bar chart for temperature_min
         fig_min = px.bar(df, x='Année', y='avg_temperature_min', color='Saison', 
-                         title=f'Évolution de la température minimale moyenne par saison à {city} ({selected_country})')
-        fig_min.update_xaxes(title_text='Année (1920 - 2022)', showgrid=False)
-        fig_min.update_yaxes(title_text='Température minimale moyenne (°C)', showgrid=False)
+                         title=f'Température Minimale Moyenne par Saison à {city} ({selected_country})',
+                         color_discrete_map=season_colors)
+        fig_min.update_layout(
+            xaxis_title='Année (1920 - 2022)',
+            yaxis_title='Température Minimale Moyenne (°C)',
+            plot_bgcolor='white'
+        )
         
-        # Create bar chart for average temperature (TAVG)
         fig_avg = px.bar(df, x='Année', y='avg_temperature_avg', color='Saison', 
-                         title=f'Évolution de la température moyenne par saison à {city} ({selected_country})')
-        fig_avg.update_xaxes(title_text='Année (1920 - 2022)', showgrid=False)
-        fig_avg.update_yaxes(title_text='Température moyenne (°C)', showgrid=False)
+                         title=f'Température Moyenne par Saison à {city} ({selected_country})',
+                         color_discrete_map=season_colors)
+        fig_avg.update_layout(
+            xaxis_title='Année (1920 - 2022)',
+            yaxis_title='Température Moyenne (°C)',
+            plot_bgcolor='white'
+        )
+        
+        graph_style = {
+            'backgroundColor': '#fff',
+            'boxShadow': '0 4px 8px rgba(0, 0, 0, 0.1)',
+            'borderRadius': '10px',
+            'padding': '20px',
+            'marginBottom': '20px'
+        }
         
         return html.Div([
-            dcc.Graph(figure=fig_max),
-            dcc.Graph(figure=fig_min),
-            dcc.Graph(figure=fig_avg)
+            html.Div(dcc.Graph(figure=fig_max), style=graph_style),
+            html.Div(dcc.Graph(figure=fig_min), style=graph_style),
+            html.Div(dcc.Graph(figure=fig_avg), style=graph_style)
         ])
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        return html.Div("An error occurred while fetching data.", style={'color': 'red'})
+        return html.Div("An error occurred while fetching data.", style={'color': 'red', 'textAlign': 'center'})
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, dev_tools_ui=False, dev_tools_props_check=False)
