@@ -137,4 +137,4 @@ def update_map(selected_countries, start_date, end_date):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, dev_tools_ui=False, dev_tools_props_check=False)
