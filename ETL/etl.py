@@ -1,14 +1,15 @@
 import os
-from ETL.utils.utils_AG import *
-from ETL.utils.utils_MO_TS import *
+from utils import utils_MO_TS
+from utils import utils_AG
+
 import pandas as pd
 
 #? uncomment what u want to run
 # drop_TAVG_TAVG_ATTRIBUTES()
 
-# fill_missing_TMIN()
+#fill_missing_TMIN()
 
-# fill_missing_TMAX()
+#fill_missing_TMAX()
 
 # fill_missing_PRCP()
 
@@ -19,5 +20,8 @@ import pandas as pd
 # fill_PRCP_ATTRIBUTES()
 
 # usage example :
-folder_path = 'data/processed/Algeria'
-drop_columns_for_all_files(folder_path)
+folder_path = 'data/processed/Tunisia'
+#utils_AG.drop_columns_for_all_files(folder_path)
+df=pd.read_csv('data/processed/Tunisia/Weather_2020-2022_TUNISIA.csv') 
+print(df.info())
+
