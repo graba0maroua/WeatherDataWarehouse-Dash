@@ -50,9 +50,8 @@ def update_weather_map(selected_countries, start_date, end_date):
 
 
 external_stylesheets = {
-    'padding': '20px',
-    'backgroundColor': '#f4f4f4',
-    'fontFamily': 'Arial, sans-serif'
+    'background-color': '#ffffff',
+    'padding': '20px'
 }
 
 graph_style = {
