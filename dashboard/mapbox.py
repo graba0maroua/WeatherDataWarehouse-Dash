@@ -38,7 +38,7 @@ def update_weather_map(selected_countries, start_date, end_date):
 
     country_in_clause = ", ".join(["'%s'" % country for country in selected_countries])
     cursor = conn.cursor(dictionary=True)
-    # Requête SQL pour récupérer les données météorologiques de(s) pay(s) selectionnés 
+    # Requête SQL pour récupérer les données météorologiques de(s) pay(s) selectionnés
     cursor.execute(f"""
     SELECT station.Ville, station.Latitude, station.Longitude,
         MAX(Mesures_Météorologiques.temperature_max) AS temperature_max,
