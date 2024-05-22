@@ -4,38 +4,41 @@ import pandas as pd
 import plotly.express as px
 import mysql.connector
 
-# Initialize Dash app
+# initialisation du dash
 app = dash.Dash(__name__)
 
 def establish_database_connection():
     try:
-        # conn = mysql.connector.connect(
-        #     host=".....",
-        #     database="..........",
-        #     user="........",
-        #     password="........"
-        # )
+        conn = mysql.connector.connect(
+            host="...............",
+            database="............",
+            user="........",
+            #password="........"
+        )
         print("database connected")
         return conn
     except mysql.connector.Error as e:
         print(f"Error connecting to MySQL database: {e}")
         return None
 
-# Connect to the MySQL database
+# Se connecter à la base de données MySQL
 conn = establish_database_connection()
 
+# Fonction pour mettre à jour la carte météorologique
 def update_weather_map(selected_countries, start_date, end_date):
     global conn
     if not selected_countries or start_date is None or end_date is None:
-        return pd.DataFrame()  
+        return pd.DataFrame() 
+    # Vérifier et rétablir la connexion à la base de données si elle est fermée ou perdue
     if conn is None or not conn.is_connected():
         conn = establish_database_connection()
     if conn is None:
-        print("MySQL connection is not available.")
-        return pd.DataFrame() 
+        print("La connexion à la base de bonnées MySQL n’est pas disponible.")
+        return pd.DataFrame() # Retourner un DataFrame vide en cas d'échec de connexion
 
     country_in_clause = ", ".join(["'%s'" % country for country in selected_countries])
     cursor = conn.cursor(dictionary=True)
+    # Requête SQL pour récupérer les données météorologiques de(s) pay(s) selectionnés 
     cursor.execute(f"""
     SELECT station.Ville, station.Latitude, station.Longitude,
         MAX(Mesures_Météorologiques.temperature_max) AS temperature_max,
@@ -60,6 +63,7 @@ external_stylesheets = {
 }
 
 
+# Définir la disposition de l'application
 app.layout = html.Div(style=external_stylesheets, children=[
     html.H1('Visualisation des données météorologiques', style={'text-align': 'center'}),
     html.Div([
@@ -95,6 +99,7 @@ app.layout = html.Div(style=external_stylesheets, children=[
     html.Div(id='weather-data', style={'margin-top': '20px', 'text-align': 'center'})
 ])
 
+# Définir le callback pour mettre à jour la carte
 @app.callback(
     Output('weather-map', 'figure'),
     [Input('country-dropdown', 'value'),
@@ -109,7 +114,8 @@ def update_map(selected_countries, start_date, end_date):
 
     if weather_data.empty:
         return {}
-
+    
+    # Créer une carte de dispersion en utilisant Plotly Express
     fig = px.scatter_mapbox(weather_data, lat="Latitude", lon="Longitude",
                             hover_name="Ville",
                             hover_data={"precipitation": True,
@@ -121,6 +127,6 @@ def update_map(selected_countries, start_date, end_date):
                       mapbox_style="open-street-map",
                       margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
-
+# Lancer l'application Dash
 if __name__ == '__main__':
     app.run_server(debug=True, dev_tools_ui=False, dev_tools_props_check=False)
