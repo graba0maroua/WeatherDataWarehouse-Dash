@@ -3,18 +3,13 @@ from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 import mysql.connector
-
+from db_config import create_connection
 # Initialize Dash app
 app = dash.Dash(__name__)
 
 def establish_database_connection():
     try:
-        # conn = mysql.connector.connect(
-        #     host=".....",
-        #     database="..........",
-        #     user="........",
-        #     password="........"
-        # )
+        conn = create_connection()
         print("database connected")
         return conn
     except mysql.connector.Error as e:
@@ -55,13 +50,26 @@ def update_weather_map(selected_countries, start_date, end_date):
 
 
 external_stylesheets = {
-    'background-color': '#ffffff',
-    'padding': '20px'
+    'padding': '20px',
+    'backgroundColor': '#f4f4f4',
+    'fontFamily': 'Arial, sans-serif'
 }
 
-
+graph_style = {
+            'backgroundColor': '#fff',
+            'boxShadow': '0 4px 8px rgba(0, 0, 0, 0.1)',
+            'borderRadius': '10px',
+            'padding': '20px',
+            'marginBottom': '20px'
+        }
 app.layout = html.Div(style=external_stylesheets, children=[
-    html.H1('Visualisation des données météorologiques', style={'text-align': 'center'}),
+    html.H1('Visualisation des données météorologiques',  style={
+        'color': '#333333',
+        'textAlign': 'center',
+        'marginBottom': '40px',
+        'fontSize': '2rem',
+        'fontFamily': 'Open Sans, sans-serif'
+    }),
     html.Div([
         dcc.Dropdown(
             id='country-dropdown',

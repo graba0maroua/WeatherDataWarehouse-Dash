@@ -59,13 +59,14 @@ app.layout = html.Div(style={
     'padding': '30px',
     'fontFamily': 'Arial, sans-serif'
 }, children=[
-    html.H1("Évolution de la Température par Saison", style={
+    html.H1("Évolution de la Température de par Saison", style={
         'color': '#333333',
         'textAlign': 'center',
-        'marginBottom': '40px',
-        'fontSize': '2.5em',
-        'fontFamily': 'Lato, sans-serif'
+        'fontSize': '2rem',
+        'fontFamily': 'Open sans, sans-serif'
     }),
+    html.P("Ce graphique montre l'évolution de la température  pour une station météorologique au fil des saisons de l'année",style={'color': '#333333', 'textAlign': 'center','fontSize':'1.2rem'}),
+
     html.Div([
         html.Div([
             dcc.Dropdown(

@@ -15,9 +15,9 @@ def fetch_temperature_data_at_station(city, selected_country):
         # Execute SQL query to fetch temperature data for the specified station
         query = """
         SELECT t.Année,
-            ROUND(AVG(m.temperature_max), 1) AS avg_temperature_max,
-            ROUND(AVG(m.temperature_min), 1) AS avg_temperature_min,
-            ROUND((AVG(m.temperature_max) + AVG(m.temperature_min)) / 2, 1) AS avg_temperature_avg
+            ROUND(AVG(m.temperature_max), 1) AS "température maximale",
+            ROUND(AVG(m.temperature_min), 1) AS "température minimale",
+            ROUND((AVG(m.temperature_max) + AVG(m.temperature_min)) / 2, 1) AS "température moyenne"
         FROM temps t
         JOIN mesures_météorologiques m ON t.id_date = m.id_date
         JOIN station s ON m.id_station = s.id_station
@@ -45,7 +45,8 @@ station_options = [{'label': station['ville'], 'value': station['ville']} for st
 app = dash.Dash(__name__)
 
 app.layout = html.Div(style={'backgroundColor': '#f9f9f9', 'padding': '20px'}, children=[
-    html.H1("Évolution de la température par trimestre", style={'color': '#333333', 'textAlign': 'center'}),
+    html.H1("Évolution de la température par pays", style={'color': '#333333', 'textAlign': 'center','fontFamily': 'Open Sans, sans-serif'}),
+    html.P("Ce graphique montre l'évolution de la température au fil des ans pour une station météorologique donnée.",style={'color': '#333333', 'textAlign': 'center','fontSize':'1.4rem'}),
     html.Div([
         html.Div([
             dcc.Dropdown(
@@ -88,8 +89,8 @@ def update_temperature_graph(city, selected_country):
         
         # Create line chart for temperature metrics
         fig = px.line(df, x='Année', 
-                      y=['avg_temperature_max', 'avg_temperature_min', 'avg_temperature_avg'], 
-                      title=f'Évolution de la température par trimestre à {city} ({selected_country})')
+                      y=['température maximale', 'température minimale', 'température moyenne'], 
+                      title=f'Évolution de la température  à {city} ({selected_country})')
         fig.update_xaxes(title_text='Année (1920 - 2022)', showgrid=False)
         fig.update_yaxes(title_text='Température (°C)', showgrid=False)
         
