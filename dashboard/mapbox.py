@@ -3,8 +3,8 @@ from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 import mysql.connector
-from db_config import create_connection
-# Initialize Dash app
+from database.db_config import create_connection
+# initialisation du dash
 app = dash.Dash(__name__)
 
 def establish_database_connection():
@@ -16,7 +16,7 @@ def establish_database_connection():
         print(f"Error connecting to MySQL database: {e}")
         return None
 
-# Connect to the MySQL database
+# Se connecter à la base de données MySQL
 conn = establish_database_connection()
 
 def update_weather_map(selected_countries, start_date, end_date):
@@ -26,11 +26,12 @@ def update_weather_map(selected_countries, start_date, end_date):
     if conn is None or not conn.is_connected():
         conn = establish_database_connection()
     if conn is None:
-        print("MySQL connection is not available.")
+        print("La connexion à la base de bonnées MySQL n’est pas disponible.")
         return pd.DataFrame() 
 
     country_in_clause = ", ".join(["'%s'" % country for country in selected_countries])
     cursor = conn.cursor(dictionary=True)
+    # Requête SQL pour récupérer les données météorologiques de(s) pay(s) selectionnés 
     cursor.execute(f"""
     SELECT station.Ville, station.Latitude, station.Longitude,
         MAX(Mesures_Météorologiques.temperature_max) AS temperature_max,
@@ -61,6 +62,7 @@ graph_style = {
             'padding': '20px',
             'marginBottom': '20px'
         }
+# Définir la disposition de l'application
 app.layout = html.Div(style=external_stylesheets, children=[
     html.H1('Visualisation des données météorologiques',  style={
         'color': '#333333',
@@ -116,7 +118,8 @@ def update_map(selected_countries, start_date, end_date):
 
     if weather_data.empty:
         return {}
-
+       
+    # Créer une carte de dispersion en utilisant Plotly Express
     fig = px.scatter_mapbox(weather_data, lat="Latitude", lon="Longitude",
                             hover_name="Ville",
                             hover_data={"precipitation": True,
@@ -128,6 +131,6 @@ def update_map(selected_countries, start_date, end_date):
                       mapbox_style="open-street-map",
                       margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
-
+# Lancer l'application Dash
 if __name__ == '__main__':
     app.run_server(debug=True, dev_tools_ui=False, dev_tools_props_check=False)

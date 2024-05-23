@@ -1,17 +1,36 @@
-import os
+import mysql.connector
+from mysql.connector import errorcode
 import pandas as pd
-from db_config import create_connection
+import os
 
-# create_connection contains my MYSQL connection it looks like this and i saved it in db_config
-# ?   def create_connection():
-#  ?   return mysql.connector.connect(
-#   ?      host=".......",
-#    ?     user="....",
-#     ?    password="................",
-#      ?   database="................."
-#       ?  )
-
-# Function to create tables in the database
+def create_connection():
+    return mysql.connector.connect(
+       host="localhost",
+       user="...........",
+       password="................",
+    )
+#Céation de la base de données 
+def create_database(connection, database_name):
+    cursor = connection.cursor()
+    try:
+        cursor.execute(f"CREATE DATABASE {database_name}")
+        print(f"La Base de données {database_name} crée avec succès.")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print(f"La Base de données {database_name} existe déjà.")
+        else:
+            print(f"Échec de création de la base de données : {err}")
+    finally:
+        cursor.close()
+#Etablire une connection à la base de données 
+def connect_to_database(database_name):
+    return mysql.connector.connect(
+        host="localhost",
+        user="...............",
+        password="................",
+        database=database_name
+    )
+#Création des tables en respectant le shémas en étoile 
 def create_tables(connection):
     cursor = connection.cursor()
     cursor.execute("""
@@ -50,7 +69,6 @@ def create_tables(connection):
     """)
     connection.commit()
 
-# Helper function to calculate season based on date
 def calculate_season(date):
     month = date.month
     if 3 <= month <= 5:
@@ -61,7 +79,7 @@ def calculate_season(date):
         return 'Autumn'
     else:
         return 'Winter'
-    
+
 def calculate_trimestre(date):
     month = date.month
     if month <= 3:
@@ -72,17 +90,14 @@ def calculate_trimestre(date):
         return 3
     else:
         return 4
-    
-# Helper function to extract Ville and Pays from NAME column
+
 def extract_ville_pays(name):
     ville, pays = name.split(',')[0].strip(), name.split(',')[1].strip()
     return ville, pays
-
-# Function to insert data into tables
+#Insertion des données données traitées dans les tables 
 def insert_data(connection, file_path):
-    df = pd.read_csv(file_path, parse_dates=['DATE'])  # Parse 'DATE' column as datetime
+    df = pd.read_csv(file_path, parse_dates=['DATE'])
     cursor = connection.cursor()
-    # Insert into temps table
     temp_ids = {}
     for index, row in df.iterrows():
         cursor.execute("""
@@ -91,7 +106,7 @@ def insert_data(connection, file_path):
         """, (row['DATE'], row['DATE'].month, row['DATE'].year, calculate_season(row['DATE']), calculate_trimestre(row['DATE'])))
         temp_id = cursor.lastrowid
         temp_ids[index] = temp_id
-    # Insert into station table
+
     station_ids = {}
     for index, row in df.iterrows():
         ville, pays = extract_ville_pays(row['NAME'])
@@ -101,7 +116,7 @@ def insert_data(connection, file_path):
         """, (row['STATION'], row['NAME'], pays, ville, row['LATITUDE'], row['LONGITUDE'], row['ELEVATION']))
         station_id = cursor.lastrowid
         station_ids[index] = station_id
-    # Insert into Mesures_Météorologiques table
+
     for index, row in df.iterrows():
         cursor.execute("""
             INSERT INTO Mesures_Météorologiques (id_date, id_station, precipitation, temperature_max, temperature_min)
@@ -109,20 +124,18 @@ def insert_data(connection, file_path):
         """, (temp_ids[index], station_ids[index], row['PRCP'], row['TMAX'], row['TMIN']))
     connection.commit()
 
-
-# Main function
-import os
-
 def main():
     processed_folder = 'data/processed'
     connection = create_connection()
-    create_tables(connection)
+    create_database(connection, 'weather_datawarehouse')
+    connection.close()
     
-    # Iterate over folders in the processed directory
+    connection = connect_to_database('weather_datawarehouse')
+    create_tables(connection)
+
     for country_folder in os.listdir(processed_folder):
         country_folder_path = os.path.join(processed_folder, country_folder)
         
-        # Check if the item is a directory
         if os.path.isdir(country_folder_path):
             for file_name in os.listdir(country_folder_path):
                 if file_name.endswith('.csv'):

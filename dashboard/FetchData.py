@@ -1,4 +1,4 @@
-from db_config import create_connection
+from database.db_config import create_connection
 
 # Récupérer les données climatiques depuis la base de données
 connection = create_connection()

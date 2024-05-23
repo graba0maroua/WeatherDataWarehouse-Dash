@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 from FetchData import fetch_stations
-from db_config import create_connection
+from database.db_config import create_connection
 
 # Define mapping for season names in French
 seasons_mapping = {

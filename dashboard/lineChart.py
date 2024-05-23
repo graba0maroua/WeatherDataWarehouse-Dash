@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 from FetchData import  fetch_stations
-from db_config import create_connection
+from database.db_config import create_connection
 
 def fetch_temperature_data_at_station(city, selected_country):
     try:
